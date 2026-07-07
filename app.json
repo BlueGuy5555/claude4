@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "RepCam",
+    "slug": "repcam",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "repcam",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0B0F"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.repcam.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "RepCam uses the camera on-device to detect your body and count your reps. No video ever leaves your phone."
+      }
+    },
+    "android": {
+      "package": "com.repcam.app",
+      "permissions": ["CAMERA"],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B0B0F"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "RepCam uses the camera on-device to detect your body and count your reps. No video ever leaves your phone."
+        }
+      ]
+    ]
+  }
+}
