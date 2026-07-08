@@ -6,7 +6,7 @@
  * for the "rest is HIGH, effort is LOW" convention.
  */
 import { Pose } from '../pose/types';
-import { bestSideJointAngle, jointAngle } from '../pose/angles';
+import { bestSideJointAngle } from '../pose/angles';
 import { ExerciseDef, ExerciseId } from './types';
 
 /** Elbow angle (shoulder–elbow–wrist), best of the two visible sides. */

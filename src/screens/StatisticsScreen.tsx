@@ -14,7 +14,7 @@ import { personalBests, repsByExercise, repsPerDay, summarize } from '../data/ag
 
 type Range = '7' | '30';
 
-export function ProgressScreen() {
+export function StatisticsScreen() {
   const theme = useTheme();
   const { sessions } = useHistory();
   const [range, setRange] = useState<Range>('7');
@@ -32,7 +32,7 @@ export function ProgressScreen() {
     return (
       <Screen>
         <AppText variant="title" style={{ marginBottom: 8 }}>
-          Progress
+          Statistics
         </AppText>
         <Card>
           <AppText variant="subheading">No workouts yet</AppText>
@@ -47,7 +47,7 @@ export function ProgressScreen() {
   return (
     <Screen>
       <AppText variant="title" style={{ marginBottom: 16 }}>
-        Progress
+        Statistics
       </AppText>
 
       <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>

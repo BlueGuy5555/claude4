@@ -3,7 +3,7 @@ import { Alert, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Camera, CameraType } from 'expo-camera';
+import { CameraType, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { AppText } from '../components/Typography';
 import { Button } from '../components/Button';
@@ -35,9 +35,9 @@ export function SessionScreen() {
   const { addSession } = useHistory();
   const { prefs } = useSettings();
 
-  const [permission, requestPermission] = Camera.useCameraPermissions();
+  const [permission, requestPermission] = useCameraPermissions();
   const [mode, setMode] = useState<Mode>('demo');
-  const [cameraType, setCameraType] = useState<CameraType>(CameraType.back);
+  const [cameraType, setCameraType] = useState<CameraType>('back');
   const [elapsed, setElapsed] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
   const startedAtRef = useRef<number>(Date.now());
@@ -109,10 +109,10 @@ export function SessionScreen() {
       <View style={{ flex: 1 }}>
         {mode === 'camera' ? (
           <CameraPoseView
-            pose={session.lastPose}
+            exerciseId={session.activeExercise}
             onPose={session.pushPose}
             onError={handleCameraError}
-            cameraType={cameraType}
+            facing={cameraType}
           />
         ) : (
           <DemoPoseView exerciseId={session.activeExercise} pose={session.lastPose} onPose={session.pushPose} />
@@ -146,7 +146,7 @@ export function SessionScreen() {
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {mode === 'camera' ? (
             <Pressable
-              onPress={() => setCameraType((t) => (t === CameraType.back ? CameraType.front : CameraType.back))}
+              onPress={() => setCameraType((t) => (t === 'back' ? 'front' : 'back'))}
               style={{ backgroundColor: theme.colors.scrim, borderRadius: 999, padding: 10 }}
             >
               <AppText style={{ fontSize: 16 }}>🔄</AppText>

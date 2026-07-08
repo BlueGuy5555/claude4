@@ -1,107 +1,100 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View } from 'react-native';
-import { Camera, CameraType } from 'expo-camera';
-import { cameraWithTensors } from '@tensorflow/tfjs-react-native';
+import React, { useEffect, useRef } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { CameraView, CameraType } from 'expo-camera';
 import { Pose } from '../../core/pose/types';
-import { MoveNetPoseProvider } from '../../services/pose/MoveNetPoseProvider';
-import { PoseOverlay } from '../../components/PoseOverlay';
-
-// MoveNet input resolution. Poses come back in this coordinate space, so the
-// overlay is told to treat it as the source dimensions.
-const TENSOR_WIDTH = 152;
-const TENSOR_HEIGHT = 200;
-
-const TensorCamera = cameraWithTensors(Camera as any);
+import { ExerciseId } from '../../core/reps/types';
+import { EXERCISES } from '../../core/reps/exercises';
+import { MockPoseProvider } from '../../services/pose/MockPoseProvider';
+import { AppText } from '../../components/Typography';
+import { useTheme } from '../../theme/ThemeProvider';
 
 interface CameraPoseViewProps {
-  pose: Pose | undefined;
+  exerciseId: ExerciseId;
+  /** Feed a pose into the rep session (drives the counter). */
   onPose: (pose: Pose) => void;
+  /** Called if the camera fails to mount so the caller can fall back to demo. */
   onError: (message: string) => void;
-  cameraType: CameraType;
+  facing: CameraType;
 }
 
 /**
- * Renders the live camera feed and runs MoveNet on each frame. The frame loop
- * pulls image tensors from tfjs-react-native's tensor stream, hands each to the
- * pose provider (which disposes it), and forwards any detected pose upward.
+ * Live camera preview for the workout session.
+ *
+ * On-device pose detection is intentionally *not* wired up yet (see the
+ * placeholder banner below). To keep the whole UI — the rep counter, the finish
+ * flow, history and stats — functional in the meantime, we drive a temporary
+ * synthetic "mover" ({@link MockPoseProvider}) on a fixed interval and push its
+ * poses into the rep session. The real camera frames are shown purely as a
+ * preview; they are not analysed.
+ *
+ * When pose detection lands, the only change needed here is to replace the
+ * synthetic interval with real frame analysis and forward the detected pose.
  */
-export function CameraPoseView({ pose, onPose, onError, cameraType }: CameraPoseViewProps) {
-  const [layout, setLayout] = useState({ width: 0, height: 0 });
-  const providerRef = useRef<MoveNetPoseProvider | null>(null);
-  const rafRef = useRef<number | null>(null);
-  const [ready, setReady] = useState(false);
+export function CameraPoseView({ exerciseId, onPose, onError, facing }: CameraPoseViewProps) {
+  const theme = useTheme();
+  const providerRef = useRef<MockPoseProvider>(new MockPoseProvider(EXERCISES[exerciseId]));
 
+  // Keep the synthetic mover in sync with the selected exercise.
   useEffect(() => {
-    let cancelled = false;
-    const provider = new MoveNetPoseProvider();
-    providerRef.current = provider;
-    provider
-      .init()
-      .then(() => {
-        if (!cancelled) setReady(true);
-      })
-      .catch((e) => onError(e?.message ?? 'Failed to load the pose model.'));
-    return () => {
-      cancelled = true;
-      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
-      void provider.dispose();
-    };
-  }, [onError]);
+    providerRef.current.setExercise(EXERCISES[exerciseId]);
+  }, [exerciseId]);
 
-  const handleReady = useMemo(
-    () =>
-      (images: any) => {
-        const loop = async () => {
-          const provider = providerRef.current;
-          const next = images.next().value;
-          if (provider && next) {
-            try {
-              const detected = await provider.estimate(next);
-              if (detected) onPose(detected);
-            } catch (e: any) {
-              onError(e?.message ?? 'Pose estimation failed.');
-              return;
-            }
-          }
-          rafRef.current = requestAnimationFrame(loop);
-        };
-        loop();
-      },
-    [onPose, onError],
-  );
+  // TEMPORARY: synthesize movement (~30 fps) so the fake rep counter ticks up.
+  useEffect(() => {
+    let active = true;
+    const tick = async () => {
+      if (!active) return;
+      const pose = await providerRef.current.estimate(undefined);
+      if (pose) onPose(pose);
+    };
+    const interval = setInterval(tick, 33);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [onPose]);
 
   return (
-    <View
-      style={{ flex: 1 }}
-      onLayout={(e) => setLayout({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })}
-    >
-      {ready ? (
-        <TensorCamera
-          style={{ flex: 1 }}
-          type={cameraType}
-          cameraTextureHeight={1200}
-          cameraTextureWidth={1600}
-          resizeHeight={TENSOR_HEIGHT}
-          resizeWidth={TENSOR_WIDTH}
-          resizeDepth={3}
-          onReady={handleReady}
-          autorender
-          useCustomShadersToResize={false}
-        />
-      ) : (
-        <View style={{ flex: 1 }} />
-      )}
-      {layout.width > 0 ? (
-        <PoseOverlay
-          pose={pose}
-          sourceWidth={TENSOR_WIDTH}
-          sourceHeight={TENSOR_HEIGHT}
-          width={layout.width}
-          height={layout.height}
-          mirror={cameraType === CameraType.front}
-        />
-      ) : null}
+    <View style={StyleSheet.absoluteFill}>
+      <CameraView
+        style={StyleSheet.absoluteFill}
+        facing={facing}
+        onMountError={(e) => onError(e?.message ?? 'Camera failed to start.')}
+      />
+
+      {/* Placeholder banner — pose detection is deferred to a later milestone. */}
+      <View style={styles.bannerWrap} pointerEvents="none">
+        <View style={[styles.banner, { backgroundColor: theme.colors.scrim }]}>
+          <AppText variant="subheading" style={styles.bannerText}>
+            Pose Detection will be implemented later.
+          </AppText>
+          <AppText variant="caption" muted style={styles.bannerText}>
+            The rep counter below is temporary and simulated.
+          </AppText>
+        </View>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  bannerWrap: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 24,
+    right: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  banner: {
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    gap: 6,
+    maxWidth: 320,
+  },
+  bannerText: {
+    textAlign: 'center',
+  },
+});

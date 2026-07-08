@@ -29,7 +29,8 @@ const AUTO_WINDOW = 24; // ~1s of frames
 /**
  * Owns the live counting state for one workout. It is deliberately unaware of
  * *where* poses come from — the screen pumps poses in via `pushPose`, whether
- * they originate from MoveNet on a real camera frame or from the demo provider.
+ * they come from the current synthetic mover or, in future, a real on-device
+ * pose detector.
  *
  * When `autoDetect` is on, it keeps a rolling window of poses and re-classifies
  * the exercise; switching exercises rebuilds the counter so thresholds match.
