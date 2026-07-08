@@ -1,10 +1,11 @@
 /**
  * Pose types shared across the app.
  *
- * We follow the MoveNet / BlazePose 17-keypoint COCO topology, which is what
- * `@tensorflow-models/pose-detection` emits. Keeping this list here (rather than
- * importing it from the model package) means the pure core can be unit-tested
- * without pulling in any native / TensorFlow dependency.
+ * We follow the standard 17-keypoint COCO topology used by common mobile pose
+ * models (e.g. MoveNet / BlazePose). Keeping this list defined here — rather than
+ * importing it from a model package — means the pure core can be unit-tested
+ * without pulling in any native / ML dependency, and leaves a clean seam for a
+ * real detector to plug into later.
  */
 
 export type KeypointName =

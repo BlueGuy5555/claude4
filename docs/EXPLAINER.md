@@ -1,5 +1,15 @@
 # RepCam — Explainer
 
+> 📌 **Status note (Expo SDK 54).** This document describes the app's original
+> design vision, which pairs the rep-counting engine with an on-device MoveNet
+> pose model. **That pose-detection path is currently deferred**: the app now
+> ships a live `expo-camera` preview with the banner *"Pose Detection will be
+> implemented later."* and feeds the engine a *synthetic* pose stream so the rep
+> counter stays functional. The TensorFlow dependencies and the `metro.config.js`
+> stubs described below have been removed. Everything else — the pure-TypeScript
+> core, the hysteresis counter, storage, stats — is exactly as described. See
+> [`UPGRADE_SDK54.md`](UPGRADE_SDK54.md) for the migration.
+
 > **TL;DR** RepCam counts your exercise reps from the phone camera, entirely
 > on-device. The interesting engineering isn't the camera — it's turning a noisy
 > stream of body keypoints into a rep count you can trust. We do that with a tiny

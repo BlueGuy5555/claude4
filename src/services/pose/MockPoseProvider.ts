@@ -2,12 +2,11 @@
  * A synthetic pose generator.
  *
  * This provider ignores the camera and instead "acts out" the selected exercise
- * by oscillating the relevant joint through its full range. It exists for two
- * reasons: (1) it lets the entire app — rep counting, history, charts — be
- * demoed and screenshotted without a physical device or the native TF backend,
- * and (2) it doubles as a safe fallback if the MoveNet model fails to load.
- *
- * It is *not* used when the real camera + MoveNet path is available on device.
+ * by oscillating the relevant joint through its full range. It currently powers
+ * the whole app: the demo skeleton, and the temporary "fake" rep counter shown
+ * behind the live camera while real on-device pose detection is still deferred.
+ * Because it drives the very same rep-counting pipeline the real detector will,
+ * every downstream feature — counting, history, charts — is fully exercised.
  */
 import { KeypointName, Keypoint, Pose, KEYPOINT_NAMES } from '../../core/pose/types';
 import { ExerciseDef, ExerciseId } from '../../core/reps/types';

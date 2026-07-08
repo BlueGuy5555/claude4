@@ -7,7 +7,8 @@ import { RootStackParamList, TabParamList } from './types';
 import { useTheme } from '../theme/ThemeProvider';
 import { AppText } from '../components/Typography';
 import { HomeScreen } from '../screens/HomeScreen';
-import { ProgressScreen } from '../screens/ProgressScreen';
+import { HistoryScreen } from '../screens/HistoryScreen';
+import { StatisticsScreen } from '../screens/StatisticsScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { SessionScreen } from '../screens/SessionScreen';
 import { PaywallScreen } from '../screens/PaywallScreen';
@@ -17,7 +18,8 @@ const Tab = createBottomTabNavigator<TabParamList>();
 
 const TAB_ICON: Record<keyof TabParamList, string> = {
   Home: '🏠',
-  Progress: '📈',
+  History: '🕘',
+  Statistics: '📈',
   Settings: '⚙️',
 };
 
@@ -41,7 +43,8 @@ function Tabs() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Progress" component={ProgressScreen} />
+      <Tab.Screen name="History" component={HistoryScreen} />
+      <Tab.Screen name="Statistics" component={StatisticsScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
